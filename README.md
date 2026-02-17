@@ -15,6 +15,7 @@ Minimal backend for `telegram_bot` with static command responses.
 - `/experience`
 - `/projects`
 - `/contact`
+- `/resume`
 - `/website`
 - `/github`
 - `/linkedin`
@@ -25,6 +26,7 @@ Minimal backend for `telegram_bot` with static command responses.
    cp .env.example .env
    ```
 2. Set `TELEGRAM_BOT_TOKEN` in `.env`.
+   - Optional: set `RESUME_URL` to a public PDF URL for `/resume`.
 3. Export env vars:
    ```bash
    export $(grep -v '^#' .env | xargs)
@@ -41,6 +43,7 @@ Set:
 - `APP_MODE=webhook`
 - `PORT=8080`
 - `WEBHOOK_SECRET=some_random_secret`
+- `RESUME_URL=https://<public-file-url>/resume.pdf` (optional)
 
 Then set webhook on Telegram:
 ```bash
@@ -61,6 +64,7 @@ This repo includes `render.yaml` for quick deployment.
 1. Push this repo to GitHub.
 2. In Render, create a new Blueprint and select this repo.
 3. Set `TELEGRAM_BOT_TOKEN` in Render environment variables.
+   - Optional: set `RESUME_URL` to your public resume PDF URL.
 4. Deploy. After deploy, note your service URL:
    - Example: `https://portfolio-bot.onrender.com`
 5. Set Telegram webhook to your public URL:

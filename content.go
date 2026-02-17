@@ -11,7 +11,8 @@ Use these commands:
 /skills - Core skills
 /experience - Work experience
 /projects - Key projects
-/contact - Contact links`),
+/contact - Contact links
+/resume - Download resume`),
 
 	"/help": strings.TrimSpace(`Available commands:
 /start
@@ -20,6 +21,7 @@ Use these commands:
 /experience
 /projects
 /contact
+/resume
 /website
 /github
 /linkedin`),

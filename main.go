@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -19,7 +20,7 @@ type telegramUpdateResponse struct {
 }
 
 type telegramUpdate struct {
-	UpdateID int             `json:"update_id"`
+	UpdateID int              `json:"update_id"`
 	Message  *telegramMessage `json:"message"`
 }
 
@@ -40,18 +41,19 @@ func main() {
 
 	appMode := getEnv("APP_MODE", "polling")
 	port := getEnv("PORT", "8080")
+	resumeURL := os.Getenv("RESUME_URL")
 
 	api := fmt.Sprintf("https://api.telegram.org/bot%s", token)
 
 	if appMode == "webhook" {
-		startWebhookServer(api, port)
+		startWebhookServer(api, port, resumeURL)
 		return
 	}
 
-	startPolling(api)
+	startPolling(api, resumeURL)
 }
 
-func startPolling(api string) {
+func startPolling(api, resumeURL string) {
 	log.Println("running in polling mode")
 	offset := 0
 
@@ -69,6 +71,14 @@ func startPolling(api string) {
 				continue
 			}
 
+			cmd := normalizeCommand(u.Message.Text)
+			if cmd == "/resume" {
+				if err := sendResume(api, u.Message.Chat.ID, resumeURL); err != nil {
+					log.Printf("sendResume failed: %v", err)
+				}
+				continue
+			}
+
 			msg := responseFor(u.Message.Text)
 			if err := sendMessage(api, u.Message.Chat.ID, msg); err != nil {
 				log.Printf("sendMessage failed: %v", err)
@@ -77,7 +87,7 @@ func startPolling(api string) {
 	}
 }
 
-func startWebhookServer(api, port string) {
+func startWebhookServer(api, port, resumeURL string) {
 	log.Printf("running in webhook mode on :%s", port)
 	secret := os.Getenv("WEBHOOK_SECRET")
 
@@ -108,6 +118,15 @@ func startWebhookServer(api, port string) {
 		}
 
 		if update.Message != nil && update.Message.Text != "" {
+			cmd := normalizeCommand(update.Message.Text)
+			if cmd == "/resume" {
+				if err := sendResume(api, update.Message.Chat.ID, resumeURL); err != nil {
+					log.Printf("sendResume failed: %v", err)
+				}
+				w.WriteHeader(http.StatusOK)
+				return
+			}
+
 			msg := responseFor(update.Message.Text)
 			if err := sendMessage(api, update.Message.Chat.ID, msg); err != nil {
 				log.Printf("sendMessage failed: %v", err)
@@ -169,6 +188,44 @@ func sendMessage(api string, chatID int64, text string) error {
 	}
 
 	return nil
+}
+
+func sendResume(api string, chatID int64, resumeURL string) error {
+	if resumeURL == "" {
+		return sendMessage(api, chatID, "Resume is not configured yet. Please try again later.")
+	}
+
+	payload := map[string]any{
+		"chat_id":  chatID,
+		"document": resumeURL,
+		"caption":  "Resume",
+	}
+
+	body, err := json.Marshal(payload)
+	if err != nil {
+		return err
+	}
+
+	resp, err := http.Post(api+"/sendDocument", "application/json", bytes.NewBuffer(body))
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= 300 {
+		respBody, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("sendDocument status %d: %s", resp.StatusCode, string(respBody))
+	}
+
+	return nil
+}
+
+func normalizeCommand(text string) string {
+	cmd := strings.TrimSpace(strings.ToLower(text))
+	if i := strings.IndexByte(cmd, ' '); i >= 0 {
+		cmd = cmd[:i]
+	}
+	return cmd
 }
 
 func getEnv(key, fallback string) string {

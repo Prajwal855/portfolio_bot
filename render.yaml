@@ -2,6 +2,7 @@ services:
   - type: web
     name: portfolio-bot
     runtime: go
+    plan: free
     buildCommand: go build -o bot .
     startCommand: ./bot
     healthCheckPath: /health

@@ -1,6 +1,6 @@
 # prajwal_portfolio_bot backend (Go)
 
-Minimal backend for `@prajwal_portfolio_bot` with static command responses.
+Minimal backend for `telegram_bot` with static command responses.
 
 ## Features
 - No database

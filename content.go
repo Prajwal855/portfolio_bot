@@ -54,13 +54,13 @@ Feb 2022 - 2024 | Bengaluru`),
 
 	"/contact": strings.TrimSpace(`Phone: +91 9900717474
 Email: prajwal.mysore0077@gmail.com
-Website: https://prajwal-portfolio.com
+Website: https://portfolio-prajwal.onrender.com
 GitHub: https://github.com/Prajwal855
-LinkedIn: https://linkedin.com/in/prajwal-m`),
+LinkedIn: https://www.linkedin.com/in/prajwal-m-30509320b/`),
 
-	"/website":  "https://prajwal-portfolio.com",
+	"/website":  "https://portfolio-prajwal.onrender.com",
 	"/github":   "https://github.com/Prajwal855",
-	"/linkedin": "https://linkedin.com/in/prajwal-m",
+	"/linkedin": "https://www.linkedin.com/in/prajwal-m-30509320b/",
 }
 
 func responseFor(text string) string {

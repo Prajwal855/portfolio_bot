@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: portfolio-bot
+    runtime: go
+    buildCommand: go build -o bot .
+    startCommand: ./bot
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: APP_MODE
+        value: webhook
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: WEBHOOK_SECRET
+        generateValue: true
